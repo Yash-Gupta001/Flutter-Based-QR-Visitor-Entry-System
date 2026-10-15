@@ -44,6 +44,18 @@ const getVisitors = async (req, res) => {
   }
 };
 
+// @desc    Get visitors registered by the logged-in user
+// @route   GET /api/visitors/my
+// @access  Private (any role)
+const getMyVisitors = async (req, res) => {
+  try {
+    const visitors = await Visitor.find({ registeredBy: req.user._id }).populate('registeredBy', 'name email');
+    res.json(visitors);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
 // @desc    Get visitor by ID
 // @route   GET /api/visitors/:id
 // @access  Private
@@ -158,6 +170,7 @@ const getVisitorQRCode = async (req, res) => {
 module.exports = {
   registerVisitor,
   getVisitors,
+  getMyVisitors,
   getVisitorById,
   updateVisitorStatus,
   checkInVisitor,

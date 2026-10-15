@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/visitor_provider.dart';
-import '../models/visitor_model.dart';
 import 'qr_generator_screen.dart';
+import 'registration_screen.dart';
 
 class VisitorDashboard extends StatefulWidget {
   @override
@@ -21,7 +21,8 @@ class _VisitorDashboardState extends State<VisitorDashboard> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<VisitorProvider>(context, listen: false)
           .setupSocketListeners();
-      Provider.of<VisitorProvider>(context, listen: false).fetchVisitors();
+      Provider.of<VisitorProvider>(context, listen: false)
+          .fetchVisitors(myVisitsOnly: true);
 
       _timer = Timer.periodic(Duration(seconds: 1), (timer) {
         _updateCountdown();
@@ -77,10 +78,7 @@ class _VisitorDashboardState extends State<VisitorDashboard> {
     final authProvider = Provider.of<AuthProvider>(context);
     final visitorProvider = Provider.of<VisitorProvider>(context);
 
-    // Filter visitors created by this user
-    final myVisits = visitorProvider.visitors
-        .where((v) => v.registeredByName == authProvider.user?.name)
-        .toList();
+    final myVisits = visitorProvider.visitors;
 
     return Scaffold(
       appBar: AppBar(
@@ -94,8 +92,21 @@ class _VisitorDashboardState extends State<VisitorDashboard> {
           )
         ],
       ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => RegistrationScreen()),
+          ).then((_) {
+            Provider.of<VisitorProvider>(context, listen: false)
+                .fetchVisitors(myVisitsOnly: true);
+          });
+        },
+        icon: Icon(Icons.add),
+        label: Text('Register Visit'),
+      ),
       body: visitorProvider.isLoading
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : Column(
               children: [
                 if (_timeRemaining.isNotEmpty)

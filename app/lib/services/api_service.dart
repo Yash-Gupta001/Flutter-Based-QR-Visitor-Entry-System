@@ -6,7 +6,8 @@ import '../models/user_model.dart';
 import '../models/visitor_model.dart';
 
 class ApiService {
-  static const String baseUrl = kIsWeb ? 'http://localhost:5000/api' : 'http://10.0.2.2:5000/api';
+  static const String baseUrl =
+      'https://qr-visitor-entry-system.onrender.com/api';
 
   static Future<String?> getToken() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -30,11 +31,13 @@ class ApiService {
     return null;
   }
 
-  static Future<UserModel?> registerUser(String name, String email, String password, String role) async {
+  static Future<UserModel?> registerUser(
+      String name, String email, String password, String role) async {
     final response = await http.post(
       Uri.parse('$baseUrl/auth/register'),
       headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'name': name, 'email': email, 'password': password, 'role': role}),
+      body: jsonEncode(
+          {'name': name, 'email': email, 'password': password, 'role': role}),
     );
 
     if (response.statusCode == 201) {
@@ -51,6 +54,23 @@ class ApiService {
     String? token = await getToken();
     final response = await http.get(
       Uri.parse('$baseUrl/visitors'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      List data = jsonDecode(response.body);
+      return data.map((v) => VisitorModel.fromJson(v)).toList();
+    }
+    return [];
+  }
+
+  static Future<List<VisitorModel>> getMyVisitors() async {
+    String? token = await getToken();
+    final response = await http.get(
+      Uri.parse('$baseUrl/visitors/my'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -97,7 +117,8 @@ class ApiService {
     return null;
   }
 
-  static Future<VisitorModel?> registerVisitor(Map<String, dynamic> visitorData) async {
+  static Future<VisitorModel?> registerVisitor(
+      Map<String, dynamic> visitorData) async {
     String? token = await getToken();
     final response = await http.post(
       Uri.parse('$baseUrl/visitors'),
@@ -137,6 +158,36 @@ class ApiService {
       },
     );
     return response.statusCode == 200;
+  }
+
+  static Future<Map<String, dynamic>> checkInVisitorWithMessage(
+      String id) async {
+    String? token = await getToken();
+    try {
+      final response = await http.put(
+        Uri.parse('$baseUrl/visitors/$id/checkin'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+      if (response.statusCode == 200) {
+        return {'success': true, 'message': 'Check-in Successful!'};
+      } else if (response.statusCode == 403) {
+        return {
+          'success': false,
+          'message': 'Visitor not approved by Admin yet!'
+        };
+      } else {
+        final body = jsonDecode(response.body);
+        return {
+          'success': false,
+          'message': body['message'] ?? 'Check-in Failed!'
+        };
+      }
+    } catch (e) {
+      return {'success': false, 'message': 'Network error. Try again.'};
+    }
   }
 
   static Future<bool> checkOutVisitor(String id) async {

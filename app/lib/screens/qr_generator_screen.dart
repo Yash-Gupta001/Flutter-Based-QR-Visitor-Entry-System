@@ -1,7 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import '../models/visitor_model.dart';
-import '../services/api_service.dart';
 import 'dashboard_screen.dart';
 
 class QRGeneratorScreen extends StatelessWidget {
@@ -11,48 +12,64 @@ class QRGeneratorScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Generate the URL directly into our local Node.js backend
-    final String qrImageUrl = '${ApiService.baseUrl}/visitors/${visitor.id}/qrcode.png';
+    // QR data matches what the backend generates: {"visitorId": "..."}
+    final String qrData = jsonEncode({'visitorId': visitor.id});
 
     return Scaffold(
-      appBar: AppBar(title: Text('Visitor QR Code')),
+      appBar: AppBar(
+          title: Text('Visitor QR Code', style: TextStyle(fontSize: 18.sp))),
       body: Center(
         child: Padding(
-          padding: EdgeInsets.all(24.0),
+          padding: EdgeInsets.all(24.w),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text('Share this QR code with the visitor', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              SizedBox(height: 30),
+              Text(
+                'Share this QR code with the visitor',
+                style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 24.h),
               Container(
-                width: 250,
-                height: 250,
-                padding: EdgeInsets.all(16.0),
+                width: 250.w,
+                height: 250.w,
+                padding: EdgeInsets.all(16.w),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 10, spreadRadius: 2)],
+                  borderRadius: BorderRadius.circular(16.r),
+                  boxShadow: [
+                    BoxShadow(
+                        color: Colors.black12, blurRadius: 10, spreadRadius: 2)
+                  ],
                 ),
-                child: Image.network(
-                  qrImageUrl,
-                  fit: BoxFit.contain,
-                  errorBuilder: (context, error, stackTrace) => Center(child: Text("QR Failed to load")),
+                child: QrImageView(
+                  data: qrData,
+                  version: QrVersions.auto,
+                  size: 220.w,
                 ),
               ),
-              SizedBox(height: 30),
-              Text('Name: ${visitor.name}', style: TextStyle(fontSize: 18)),
-              Text('Phone: ${visitor.phone}', style: TextStyle(fontSize: 16)),
-              SizedBox(height: 40),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pushAndRemoveUntil(
-                    context, 
-                    MaterialPageRoute(builder: (context) => DashboardScreen()), 
-                    (route) => false,
-                  );
-                },
-                child: Text('Back to Dashboard'),
-              )
+              SizedBox(height: 24.h),
+              Text('Name: ${visitor.name}', style: TextStyle(fontSize: 16.sp)),
+              SizedBox(height: 6.h),
+              Text('Phone: ${visitor.phone}',
+                  style: TextStyle(fontSize: 14.sp)),
+              SizedBox(height: 32.h),
+              SizedBox(
+                width: double.infinity,
+                height: 48.h,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => DashboardScreen()),
+                      (route) => false,
+                    );
+                  },
+                  child: Text('Back to Dashboard',
+                      style: TextStyle(fontSize: 15.sp)),
+                ),
+              ),
             ],
           ),
         ),

@@ -18,17 +18,22 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     for (final barcode in barcodes) {
       if (barcode.rawValue != null) {
         setState(() => _isProcessing = true);
-        
+
         try {
           final data = jsonDecode(barcode.rawValue!);
           final visitorId = data['visitorId'];
 
           if (visitorId != null) {
-            bool success = await ApiService.checkInVisitor(visitorId);
+            final result =
+                await ApiService.checkInVisitorWithMessage(visitorId);
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(success ? 'Check-in Successful!' : 'Check-in Failed!')),
+              SnackBar(
+                content: Text(result['message']),
+                backgroundColor: result['success'] ? Colors.green : Colors.red,
+              ),
             );
-            Navigator.pop(context);
+            if (result['success']) Navigator.pop(context);
+            setState(() => _isProcessing = false);
             return;
           }
         } catch (e) {

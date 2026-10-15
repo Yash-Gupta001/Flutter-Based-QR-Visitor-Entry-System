@@ -21,7 +21,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
     super.initState();
     _fetchUsers();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<VisitorProvider>(context, listen: false).setupSocketListeners();
+      Provider.of<VisitorProvider>(context, listen: false)
+          .setupSocketListeners();
       Provider.of<VisitorProvider>(context, listen: false).fetchVisitors();
     });
   }
@@ -69,13 +70,69 @@ class _AdminDashboardState extends State<AdminDashboard> {
                     itemBuilder: (context, index) {
                       final visitor = visitorProvider.visitors[index];
                       return Card(
-                        margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        margin:
+                            EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                         child: ListTile(
-                          title: Text(visitor.name, style: TextStyle(fontWeight: FontWeight.bold)),
-                          subtitle: Text('Status: ${visitor.status}\nAdded By: ${visitor.registeredByName ?? "Unknown"}'),
-                          trailing: IconButton(
-                            icon: Icon(Icons.check_circle, color: visitor.status == 'Approved' ? Colors.green : Colors.grey),
-                            onPressed: () => ApiService.updateVisitorStatus(visitor.id, 'Approved'),
+                          title: Text(visitor.name,
+                              style: TextStyle(fontWeight: FontWeight.bold)),
+                          subtitle: Text(
+                              'Status: ${visitor.status}\nAdded By: ${visitor.registeredByName ?? "Unknown"}'),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: Icon(Icons.check_circle,
+                                    color: visitor.status == 'Approved'
+                                        ? Colors.green
+                                        : Colors.grey),
+                                tooltip: 'Approve',
+                                onPressed: visitor.status == 'Approved'
+                                    ? null
+                                    : () async {
+                                        bool success = await ApiService
+                                            .updateVisitorStatus(
+                                                visitor.id, 'Approved');
+                                        if (success) {
+                                          Provider.of<VisitorProvider>(context,
+                                                  listen: false)
+                                              .fetchVisitors();
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            SnackBar(
+                                                content: Text(
+                                                    '${visitor.name} Approved'),
+                                                backgroundColor: Colors.green),
+                                          );
+                                        }
+                                      },
+                              ),
+                              IconButton(
+                                icon: Icon(Icons.cancel,
+                                    color: visitor.status == 'Rejected'
+                                        ? Colors.red
+                                        : Colors.grey),
+                                tooltip: 'Reject',
+                                onPressed: visitor.status == 'Rejected'
+                                    ? null
+                                    : () async {
+                                        bool success = await ApiService
+                                            .updateVisitorStatus(
+                                                visitor.id, 'Rejected');
+                                        if (success) {
+                                          Provider.of<VisitorProvider>(context,
+                                                  listen: false)
+                                              .fetchVisitors();
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            SnackBar(
+                                                content: Text(
+                                                    '${visitor.name} Rejected'),
+                                                backgroundColor: Colors.red),
+                                          );
+                                        }
+                                      },
+                              ),
+                            ],
                           ),
                         ),
                       );
@@ -89,10 +146,12 @@ class _AdminDashboardState extends State<AdminDashboard> {
                     itemBuilder: (context, index) {
                       final u = _usersList[index];
                       return ListTile(
-                        leading: CircleAvatar(child: Text(u.name.substring(0,1))),
+                        leading:
+                            CircleAvatar(child: Text(u.name.substring(0, 1))),
                         title: Text(u.name),
                         subtitle: Text(u.email),
-                        trailing: Text(u.role, style: TextStyle(fontWeight: FontWeight.bold)),
+                        trailing: Text(u.role,
+                            style: TextStyle(fontWeight: FontWeight.bold)),
                       );
                     },
                   ),
@@ -103,32 +162,37 @@ class _AdminDashboardState extends State<AdminDashboard> {
           onPressed: () {
             // Give admin option to add Visitor or User
             showModalBottomSheet(
-              context: context,
-              builder: (_) => Container(
-                padding: EdgeInsets.all(20),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    ListTile(
-                      leading: Icon(Icons.person),
-                      title: Text('Add New Visitor'),
-                      onTap: () {
-                        Navigator.pop(context);
-                        Navigator.push(context, MaterialPageRoute(builder: (_) => RegistrationScreen()));
-                      },
-                    ),
-                    ListTile(
-                      leading: Icon(Icons.admin_panel_settings),
-                      title: Text('Add New User / Security'),
-                      onTap: () {
-                        Navigator.pop(context);
-                        Navigator.push(context, MaterialPageRoute(builder: (_) => SignupScreen()));
-                      },
-                    ),
-                  ],
-                ),
-              )
-            );
+                context: context,
+                builder: (_) => Container(
+                      padding: EdgeInsets.all(20),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ListTile(
+                            leading: Icon(Icons.person),
+                            title: Text('Add New Visitor'),
+                            onTap: () {
+                              Navigator.pop(context);
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (_) => RegistrationScreen()));
+                            },
+                          ),
+                          ListTile(
+                            leading: Icon(Icons.admin_panel_settings),
+                            title: Text('Add New User / Security'),
+                            onTap: () {
+                              Navigator.pop(context);
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (_) => SignupScreen()));
+                            },
+                          ),
+                        ],
+                      ),
+                    ));
           },
         ),
       ),
