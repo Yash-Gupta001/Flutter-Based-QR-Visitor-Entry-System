@@ -3,6 +3,7 @@ const router = express.Router();
 const {
   registerVisitor,
   getVisitors,
+  getMyVisitors,
   getVisitorById,
   updateVisitorStatus,
   checkInVisitor,
@@ -10,6 +11,8 @@ const {
   getVisitorQRCode,
 } = require('../controllers/visitorController');
 const { protect, securityOrAdmin } = require('../middleware/authMiddleware');
+
+router.route('/my').get(protect, getMyVisitors);
 
 router.route('/')
   .post(protect, registerVisitor)

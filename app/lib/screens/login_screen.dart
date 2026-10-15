@@ -20,6 +20,8 @@ class _LoginScreenState extends State<LoginScreen> {
       _passwordController.text,
     );
 
+    if (!mounted) return;
+
     if (success) {
       Navigator.pushReplacement(
         context,
@@ -35,7 +37,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
-    
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: Center(
@@ -46,15 +48,18 @@ class _LoginScreenState extends State<LoginScreen> {
             children: [
               Icon(Icons.security, size: 80, color: Colors.blueAccent),
               SizedBox(height: 20),
-              Text('QuickPass', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold)),
+              Text('QuickPass',
+                  style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold)),
               SizedBox(height: 10),
-              Text('Smart Visitor Management System', style: TextStyle(color: Colors.grey)),
+              Text('Smart Visitor Management System',
+                  style: TextStyle(color: Colors.grey)),
               SizedBox(height: 40),
               TextField(
                 controller: _emailController,
                 decoration: InputDecoration(
                   labelText: 'Email',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12)),
                   prefixIcon: Icon(Icons.email),
                 ),
               ),
@@ -64,24 +69,26 @@ class _LoginScreenState extends State<LoginScreen> {
                 obscureText: true,
                 decoration: InputDecoration(
                   labelText: 'Password',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12)),
                   prefixIcon: Icon(Icons.lock),
                 ),
               ),
               SizedBox(height: 30),
               authProvider.isLoading
-                ? CircularProgressIndicator()
-                : SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: ElevatedButton(
-                      onPressed: _login,
-                      style: ElevatedButton.styleFrom(
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ? CircularProgressIndicator()
+                  : SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: ElevatedButton(
+                        onPressed: _login,
+                        style: ElevatedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
+                        ),
+                        child: Text('Login', style: TextStyle(fontSize: 18)),
                       ),
-                      child: Text('Login', style: TextStyle(fontSize: 18)),
                     ),
-                  ),
               SizedBox(height: 20),
               TextButton(
                 onPressed: () {

@@ -10,12 +10,14 @@ class VisitorProvider with ChangeNotifier {
   List<VisitorModel> get visitors => _visitors;
   bool get isLoading => _isLoading;
 
-  Future<void> fetchVisitors() async {
+  Future<void> fetchVisitors({bool myVisitsOnly = false}) async {
     _isLoading = true;
     notifyListeners();
 
-    _visitors = await ApiService.getVisitors();
-    
+    _visitors = myVisitsOnly
+        ? await ApiService.getMyVisitors()
+        : await ApiService.getVisitors();
+
     _isLoading = false;
     notifyListeners();
   }
